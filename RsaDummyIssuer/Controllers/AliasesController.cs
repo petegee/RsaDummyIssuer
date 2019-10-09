@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using RsaDummyIssuer.Data;
 using RsaThreeDeeSecure.Jwe;
 using RsaThreeDeeSecure.Messages.Requests;
 using RsaThreeDeeSecure.Messages.Responses;
@@ -21,6 +20,7 @@ namespace RsaDummyIssuer.Controllers
     {
         [Route("3.1/fetchAvailableAliases")]
         [HttpPost]
+        //[Produces("application/jose")]
         public async Task<ActionResult> Post()
         {
             string jweMessage;
@@ -31,48 +31,76 @@ namespace RsaDummyIssuer.Controllers
            
             var raw = JweMessage.FromEncryptedString(
                 jweMessage, 
-                IssuerEncryptionCert.GetP12Cert(),
+                IssuerEncryptionCert,
                 new DevJweCryptoPolicy()
             );
             
             Console.WriteLine($"Received POST request: Decrypted Payload:\n{raw.GetClearTextMessage()}");
             Console.WriteLine("=======================================================================");
+
+            var request = raw.GetDecryptedJsonObjectAs<FetchAvailableAliasesRequest>();
             
-            var request = JweMessage.FromEncryptedString<FetchAvailableAliasesRequests>(
-                jweMessage, 
-                IssuerEncryptionCert.GetP12Cert(),
-                new DevJweCryptoPolicy()
-            );
-            
-            var response = new FetchAvailableAliasesResponse
-            { 
-                RsaSessionId = request.RsaSessionId,
-                IssuerSessionId = request.IssuerSessionId,
-                Version = "3.1",
-                TimeStamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
-                AvailableAliases = new AvailableAliases[]
-                {
-                    new AvailableAliases
+            var response = Success.WrapResponse(
+                new FetchAvailableAliasesResponse
+                { 
+                    RsaSessionId = request.RsaSessionId,
+                    IssuerSessionId = request.IssuerSessionId,
+                    Version = "3.1",
+                    TimeStamp = DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss"),
+                    AvailableAliases = new[]
                     {
-                        Alias = "0800-83-83-83", 
-                        AliasType = AvailableAliases.AliasTypes.SMS, 
-                        DisplayAlias = "Mobile",
-                        AliasId = "1234", 
-                        DisplayAliasType = "SMS"
+                        new AvailableAliases
+                        {
+                            Alias = "0800838383", 
+                            AliasType = AvailableAliases.AliasTypes.SMS.ToString(), 
+                            DisplayAlias = "Mobile",
+                            AliasId = "123", 
+                            DisplayAliasType = "SMS"
+                        }
                     }
-                }
-            };
+                });
 
             
             Console.WriteLine($"Returning response:\n{JsonConvert.SerializeObject(response)}");
             Console.WriteLine("=======================================================================");
+
+            var encrypted = JweMessage.CreateFrom(
+                response,
+                ClientEncryptionCert,
+                new List<X509Certificate2> {IssuerSigningCert});
             
-            return new ObjectResult(
-                JweMessage.CreateFrom(
-                    response, 
-                    IssuerEncryptionCert.GetP12Cert(),
-                    new List<X509Certificate2> { IssuerEncryptionCert.GetP12Cert() }));
+            
+            return new ObjectResult(encrypted);
         }
+
+
+        private X509Certificate2 ClientEncryptionCert => new X509Certificate2("./certs/clientEncryption.p12");
+        private X509Certificate2 ClientSigninCert => new X509Certificate2("./certs/clientSigning.p12");
+        private X509Certificate2 IssuerEncryptionCert => new X509Certificate2("./certs/issuerEncryption.p12");
+        private X509Certificate2 IssuerSigningCert => new X509Certificate2("./certs/issuerSigning.p12");
+
+
+        private string CannedResponse =
+            "{ " +
+            "    \"success\":{ " +
+            "    \"rsaSessionId\":\"6100110510100344\"," +
+            "    \"issuerSessionId\":\"d04c3a7e-a0f8-4d70-bae0-449c36557847\"," +
+            "    \"timeStamp\":\"20191009002447\"," +
+            "    \"version\":\"3.1\"," +
+            "    \"service\":\"RSA_CLIENT\"," +
+            "    \"availableAliases\":[ " +
+            "    { " +
+            "    \"alias\":\"442072343456\"," +
+            "    \"displayAlias\":\"44207****456\"," +
+            "    \"aliasType\":\"SMS\"," +
+            "    \"displayAliasType\":\"mobile\"," +
+            "    \"aliasId\":\"001\"" +
+            "    }" +
+            "    ]" +
+            "    }" +
+            "}    ";
+
+
     }
     
     public class DevJweCryptoPolicy : IJweCryptoPolicy

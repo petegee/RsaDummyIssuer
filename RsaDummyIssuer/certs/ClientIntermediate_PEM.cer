@@ -1,15 +1,4 @@
-using System.Security.Cryptography.X509Certificates;
-using RsaThreeDeeSecure.Extensions;
-
-namespace RsaDummyIssuer.Data
-{
-    public class RsaIntermediateCert
-    {
-        public static X509Certificate2 GetX509Certificate2()
-            => new X509Certificate2(Cert.PemCertToByteArray());
-        
-        public const string Cert =
-@"-----BEGIN CERTIFICATE-----
+﻿-----BEGIN CERTIFICATE-----
 MIIEwDCCAqigAwIBAgICEk0wDQYJKoZIhvcNAQELBQAwazELMAkGA1UEBhMCSUwx
 CzAJBgNVBAgMAk5BMREwDwYDVQQHDAhIZXJ6ZWxpYTEXMBUGA1UECgwOUlNBIENv
 cnAsIEluYy4xDDAKBgNVBAsMAzNEUzEVMBMGA1UEAwwMM0RTIFJvb3QgSFNNMB4X
@@ -36,6 +25,4 @@ Vectkc7fvnhHrbdX7wfzLalN4HX2uTqqImh2BHIpzY/g8om5Gl6YvRbOtrRAZwRC
 MPRvJm3NU8NS+5P6hcepyfKLgrK1neKqiFeHKouirKxI1vm7uDWdQSBZLckq6+jf
 JWz8ocEC2JxVSNTlav0tGE7xhH4YmXbtdbxnqZ6RO9AlZlEIv3LbLLylOmWq091i
 oH2Pvp8U9xJwIsadKbBPtubkk5c=
------END CERTIFICATE-----";
-    }
-}
+-----END CERTIFICATE-----

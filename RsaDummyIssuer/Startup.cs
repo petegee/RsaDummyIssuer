@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetcore.Builder;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +36,10 @@ namespace RsaDummyIssuer
                 app.UseDeveloperExceptionPage();
             }
 
+            app.LogRequestHeaders();
+                
             app.UseMvc();
+
         }
     }
 }
