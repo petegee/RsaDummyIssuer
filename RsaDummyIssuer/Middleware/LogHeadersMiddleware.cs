@@ -1,11 +1,10 @@
 using System;
 using System.Text;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Logging;
 
-namespace Microsoft.AspNetcore.Builder
+namespace RsaDummyIssuer.Middleware
 {
-    public static class IApplicationBuilderExtensions
+    public static class ApplicationBuilderExtensions
     {
         public static void LogRequestHeaders(this IApplicationBuilder app)
         {
@@ -14,9 +13,9 @@ namespace Microsoft.AspNetcore.Builder
                 Console.WriteLine("Request Headers:");
                 
                 var builder = new StringBuilder(Environment.NewLine);
-                foreach (var header in context.Request.Headers)
+                foreach (var (key, value) in context.Request.Headers)
                 {
-                    builder.AppendLine($"{header.Key}:{header.Value}");
+                    builder.AppendLine($"{key}:{value}");
                 }
                 Console.WriteLine(builder.ToString());
                 
@@ -25,9 +24,9 @@ namespace Microsoft.AspNetcore.Builder
                 Console.WriteLine("Response Headers:");
                 
                 builder = new StringBuilder(Environment.NewLine);
-                foreach (var header in context.Response.Headers)
+                foreach (var (key, value) in context.Response.Headers)
                 {
-                    builder.AppendLine($"{header.Key}:{header.Value}");
+                    builder.AppendLine($"{key}:{value}");
                 }
                 Console.WriteLine(builder.ToString());
             });
