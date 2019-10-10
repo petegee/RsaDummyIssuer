@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -50,7 +51,7 @@ namespace RsaDummyIssuer.Middleware
                     
                     var rsaRequest = JweMessage.FromEncryptedString(
                         message, 
-                        IssuerEncryptionCert,
+                        new List<X509Certificate2>{IssuerEncryptionCert},
                         new DevJweCryptoPolicy()
                     ).GetDecryptedJsonObjectAs<FetchAvailableAliasesRequest>();
 
